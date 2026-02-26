@@ -5,10 +5,14 @@
 #include <signal.h>
 #include <stdint.h>
 
+// Structures
+#include "msg_ext.h"
 // Inclusion des données générées par le script Python
 #include "glyphs_ext.h"
 
-#define REBOUND 0
+#define TEXT_SPEED 25000 // 25ms pour un défilement fluide (40 FPS)
+#define MAX_TEXT_DISPLAY 6000000 // Le texte fixe reste affiché 6s
+#define MESSAGE_LIST_LENGTH 5
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 24
 #define ORANGE "\033[38;5;214m"
@@ -16,6 +20,12 @@
 
 // Le buffer mémoire (notre "carte graphique")
 uint32_t canvas[SCREEN_WIDTH];
+
+// Messages
+MessageExterieur default_message = (MessageExterieur){ "", "", 0, 0 };
+MessageExterieur* messages;
+int current_message = 0;
+int messages_size = 0;
 
 // Restauration du terminal à la sortie
 void restore_terminal() {
@@ -26,6 +36,40 @@ void restore_terminal() {
 
 void handle_sigint(int sig) {
   exit(0);
+}
+
+// Gestion des messages
+MessageExterieur* next_message(int* dest_width) {
+  if(!messages_size) {
+    *dest_width = 0;
+    return &default_message;
+  }
+  current_message = (current_message + 1) % messages_size;
+  *dest_width = 0;
+  for(int i=0; messages[current_message].message[i]; i++) *dest_width += bus_font[(unsigned char)messages[current_message].message[i]].width + (messages[current_message].message[i] != '\0');
+  return &messages[current_message];
+}
+
+void add_message(char* numero, char* message, uint8_t rebound, uint8_t time) {
+  if(messages_size + 1 == MESSAGE_LIST_LENGTH) return;
+  messages[messages_size] = (MessageExterieur){ numero, message, rebound, time };
+  messages_size++;
+}
+
+char* get_numero() {
+  return (messages_size ? messages[current_message] : default_message).numero;
+}
+
+char* get_dest() {
+  return (messages_size ? messages[current_message] : default_message).message;
+}
+
+uint8_t get_rebound() {
+  return (messages_size ? messages[current_message] : default_message).rebound;
+}
+
+uint8_t get_time() {
+  return (messages_size ? messages[current_message] : default_message).time;
 }
 
 // Fonction pour dessiner un caractère dans le canvas
@@ -87,23 +131,23 @@ int main() {
   atexit(restore_terminal);
   signal(SIGINT, handle_sigint);
   printf("\033[?25l\033[2J"); // Cache le curseur et efface l'écran une fois
-
-  const char *numero = "";
-  const char *destination = "Ce bus ne prend pas de voyageurs";
   
   int offset = -SCREEN_WIDTH;
+  int tour = 0;
+  int timeElapsed = 0;
   
   // Calcul de la largeur de la destination pour savoir quand reboucler
-  // (On simule un dessin dans le vide pour avoir la largeur)
   int dest_width = 0;
-  for(int i=0; destination[i]; i++) dest_width += bus_font[(unsigned char)destination[i]].width + (destination[i] != '\0');
+  messages = malloc(sizeof(MessageExterieur) * MESSAGE_LIST_LENGTH);
+  add_message("", "Ce bus ne prend pas de voyageurs", 1, 1);
+  next_message(&dest_width);
 
   while (1) {
     // 1. On vide le canvas
     memset(canvas, 0, sizeof(canvas));
 
     // 2. On dessine le numéro fixe
-    int debut_texte = 2 + draw_string(2, numero, 2, SCREEN_WIDTH);
+    int debut_texte = 2 + draw_string(2, get_numero(), 2, SCREEN_WIDTH);
 
     // 3. On dessine une ligne de séparation verticale (x=18)
     // for (int y = 4; y < 20; y++) canvas[2 + debut_texte] |= (1 << y);
@@ -116,30 +160,48 @@ int main() {
       // --- CAS TEXTE COURT : FIXE ET CENTRÉ ---
       // On calcule l'espace vide pour centrer le texte dans les 140px restants
       int padding = (available_width - dest_width) / 2;
-      draw_string(debut_texte + padding, destination, debut_texte, SCREEN_WIDTH);
+      draw_string(debut_texte + padding, get_dest(), debut_texte, SCREEN_WIDTH);
       
       // 5. On remet l'offset à 0 car rien ne doit bouger
-      offset = 0; 
+      offset = 0;
+
+      // 6. Gestion du temps
+      if(++timeElapsed >= MAX_TEXT_DISPLAY / TEXT_SPEED) {
+        timeElapsed = 0;
+        tour++;
+      }
     } else {
       // --- CAS TEXTE LONG : DÉFILEMENT ---
       // L'offset crée le mouvement
-      draw_string(debut_texte - offset, destination, debut_texte, SCREEN_WIDTH);
+      draw_string(debut_texte - offset, get_dest(), debut_texte, SCREEN_WIDTH);
       
       // Dessiner une deuxième fois le texte après pour un défilement infini fluide
-      if (REBOUND && debut_texte - offset + dest_width < SCREEN_WIDTH) {
-        draw_string(debut_texte - offset + dest_width + 20, destination, debut_texte, SCREEN_WIDTH);
+      if ((messages_size == 1 || tour + 1 < get_time()) && get_rebound() && debut_texte - offset + dest_width < SCREEN_WIDTH) {
+        draw_string(debut_texte - offset + dest_width + 20, get_dest(), debut_texte, SCREEN_WIDTH);
       }
 
       // 5. Gestion du défilement
       offset++;
       if (offset >= dest_width + 20) {
-        offset = REBOUND ? 0 : -SCREEN_WIDTH;
+        offset = get_rebound() ? 0 : -SCREEN_WIDTH;
+
+        // 6. Gestion du temps
+        tour++;
       }
     }
-  
-    // 6. Affichage
+
+    // 7. Affichage
     render_to_terminal();
-    usleep(25000); // 50ms pour un défilement fluide (20 FPS)
+    
+    // 8. Passage au texte suivant
+    if(messages_size > 1 && tour >= get_time()) {
+      tour = 0;
+      timeElapsed = 0;
+      offset = -SCREEN_WIDTH;
+      next_message(&dest_width);
+    }
+
+    usleep(TEXT_SPEED);
   }
 
   return 0;
