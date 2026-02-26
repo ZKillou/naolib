@@ -46,6 +46,10 @@ const uint32_t bmp_ascii_52[] = {
   0x00fc00, 0x00fe00, 0x00ef00, 0x00e780, 0x00e3c0, 0x00e1e0, 0x0ffff0, 0x0ffff0, 0x0ffff0, 0x00e000, 
 };
 
+const uint32_t bmp_ascii_46[] = {
+  0x0e0000, 0x0e0000, 0x0e0000, 
+};
+
 const uint32_t bmp_ascii_53[] = {
   0x038ff0, 0x078ff0, 0x0f8ff0, 0x0e0e70, 0x0e0e70, 0x0e0e70, 0x0e0e70, 0x0ffe70, 0x07fc70, 0x03f870, 
 };
@@ -337,7 +341,7 @@ const Glyph bus_font[256] = {
   [43] = {0},
   [44] = { bmp_ascii_44, 4 },
   [45] = { bmp_ascii_45, 10 },
-  [46] = {0},
+  [46] = { bmp_ascii_46, 3 },
   [47] = {0},
   [48] = { bmp_ascii_48, 10 },
   [49] = { bmp_ascii_49, 7 },

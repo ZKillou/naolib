@@ -8,7 +8,7 @@
 // Inclusion des données générées par le script Python
 #include "glyphs_ext.h"
 
-#define REBOUND 1
+#define REBOUND 0
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 24
 #define ORANGE "\033[38;5;214m"
@@ -88,10 +88,10 @@ int main() {
   signal(SIGINT, handle_sigint);
   printf("\033[?25l\033[2J"); // Cache le curseur et efface l'écran une fois
 
-  const char *numero = "E5";
-  const char *destination = "CARQUEFOU";
+  const char *numero = "";
+  const char *destination = "Ce bus ne prend pas de voyageurs";
   
-  int offset = 0;
+  int offset = -SCREEN_WIDTH;
   
   // Calcul de la largeur de la destination pour savoir quand reboucler
   // (On simule un dessin dans le vide pour avoir la largeur)
@@ -133,7 +133,7 @@ int main() {
       // 5. Gestion du défilement
       offset++;
       if (offset >= dest_width + 20) {
-        offset = 0;
+        offset = REBOUND ? 0 : -SCREEN_WIDTH;
       }
     }
   
