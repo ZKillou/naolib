@@ -1,6 +1,4 @@
-#include <stdint.h>
-
-typedef struct { const uint32_t *cols; uint8_t width; } Glyph;
+#include "glyphs_lp_b.h"
 
 const uint32_t bmp_ascii_32[] = {
   0x000000, 0x000000, 0x000000, 
