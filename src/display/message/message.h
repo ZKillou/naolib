@@ -33,6 +33,10 @@ char* message_get_dest(message_manager* msgs);
 uint8_t message_get_rebound(message_manager* msgs);
 uint8_t message_get_time(message_manager* msgs);
 
+// Méthodes de lecture des messages
+uint32_t message_get_next_char(const char **text);
+uint32_t message_get_fallback_code(uint32_t code);
+
 // Écoute des messages
 int message_parse_pipe_command(message_manager* msgs, char* cmd);
 int message_check_for_updates(message_manager* msgs);

@@ -13,9 +13,49 @@ message_manager* message_create_manager(uint8_t total_size, int* dest_width, cha
   return msgs;
 }
 
+uint32_t message_get_next_char(const char **text) {
+  unsigned char c = (unsigned char)**text;
+  if (c < 128) { (*text)++; return c; }
+  else if ((c & 0xE0) == 0xC0) {
+    uint32_t res = ((c & 0x1F) << 6) | ((*(*text + 1)) & 0x3F);
+    *text += 2;
+    return res;
+  }
+  (*text)++;
+  return '?';
+}
+
+uint32_t message_get_fallback_code(uint32_t code) {
+  if (bus_font[code].cols != NULL) return code;
+  switch (code) {
+    case 0xE0: case 0xE1: case 0xE2: case 0xE3: case 0xE4: return 'a';
+    case 0xE8: case 0xE9: case 0xEA: case 0xEB:           return 'e';
+    case 0xEC: case 0xED: case 0xEE: case 0xEF:           return 'i';
+    case 0xF2: case 0xF3: case 0xF4: case 0xF5: case 0xF6: return 'o';
+    case 0xF9: case 0xFA: case 0xFB: case 0xFC:           return 'u';
+    case 0xE7:                                           return 'c';
+    case 0xF1:                                           return 'n';
+    case 0xC0: case 0xC1: case 0xC2: case 0xC3: case 0xC4: return 'A';
+    case 0xC8: case 0xC9: case 0xCA: case 0xCB:           return 'E';
+    case 0xCC: case 0xCD: case 0xCE: case 0xCF:           return 'I';
+    case 0xD2: case 0xD3: case 0xD4: case 0xD5: case 0xD6: return 'O';
+    case 0xD9: case 0xDA: case 0xDB: case 0xDC:           return 'U';
+    case 0xC7:                                           return 'C';
+    case 0xD1:                                           return 'N';
+    default: return code;
+  }
+}
+
 void message_update_dest_width(message_manager* msgs) {
   *(msgs->dest_width) = 0;
-  for(int i=0; msgs->messages[msgs->current].message[i]; i++) *(msgs->dest_width) += bus_font[(unsigned char)msgs->messages[msgs->current].message[i]].width + (msgs->messages[msgs->current].message[i] != '\0');
+  const char* ptr = msgs->messages[msgs->current].message;
+  while (*ptr != '\0') {
+    uint32_t code = message_get_fallback_code(message_get_next_char(&ptr));
+    if (code < 256) {
+      if (*(msgs->dest_width) > 0) *(msgs->dest_width) += 1;
+      *(msgs->dest_width) += bus_font[code].width;
+    }
+  }
 }
 
 message_t* message_next(message_manager* msgs) {
@@ -99,6 +139,8 @@ int message_parse_pipe_command(message_manager* msgs, char* cmd) {
       int res = 0;
       if(strcmp(token, "ADD") == 0) res = message_add(msgs, num, msg, reb, t);
       else res = message_update(msgs, idx, num, msg, reb, t);
+      
+      if (idx == msgs->current) message_update_dest_width(msgs);
       return reset ? res : 0;
     }
   } else if (strcmp(token, "CLR") == 0) {
