@@ -2,7 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "canvas.h"
-#include "../glyphs/glyphs_lp_b.h"
+#include "../glyphs/font_manager.h"
 
 canvas_t* canvas_create(uint32_t width, uint32_t height, uint32_t text_speed) {
   canvas_t* canvas = malloc(sizeof(canvas_t));
@@ -18,14 +18,23 @@ void canvas_free(canvas_t *canvas) {
 
 // Fonction pour dessiner un caractère dans le canvas
 void canvas_draw_glyph(canvas_t* canvas, int x_pos, unsigned char c, int min_x, int max_x) {
-  Glyph g = bus_font[c];
+  Glyph g = font_get_glyph(c);
   if (g.cols == NULL) return;
+
+  int font_min_y = font_get_min_y();
+  int font_max_y = font_get_max_y();
+  int font_h = font_max_y - font_min_y + 1;
+  int padding = (canvas->height - font_h) / 2;
+  int shift = padding - font_min_y;
 
   for (int i = 0; i < g.width; i++) {
     int target_x = x_pos + i;
     // On ne dessine QUE si on est dans la zone autorisée
     if (target_x >= min_x && target_x < max_x) {
-      canvas->canvas[target_x] |= g.cols[i];
+      uint32_t col = g.cols[i];
+      if (shift > 0) col <<= shift;
+      else if (shift < 0) col >>= -shift;
+      canvas->canvas[target_x] |= col;
     }
   }
 }
@@ -41,7 +50,7 @@ int canvas_draw_string(canvas_t* canvas, int x_start, const char *text, int min_
     if (code < 256) { // On reste dans les limites de notre tableau
       if (current_x > x_start) current_x += 1; // +1 pour l'espacement entre lettres
       canvas_draw_glyph(canvas, current_x, code, min_x, max_x);
-      current_x += bus_font[code].width;
+      current_x += font_get_glyph(code).width;
     }
   }
   return current_x - x_start; // Retourne la largeur totale du texte dessiné

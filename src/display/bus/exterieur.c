@@ -6,6 +6,8 @@
 #include <sys/stat.h>
 
 #include "../render/render.h"
+#include "../glyphs/font_manager.h"
+#include "../glyphs/glyphs_lp_b.h"
 
 #define TEXT_SPEED 25000 // 25ms pour un défilement fluide (40 FPS)
 #define PIPE_PATH "/tmp/bus_display_front_001"
@@ -21,6 +23,8 @@ int main() {
   atexit(render_end);
   signal(SIGINT, handle_sigint);
   render_init();
+
+  font_set(&font_lp_b);
 
   canvas_t* canvas = canvas_create(SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_SPEED);
   message_manager* msgs = message_create_manager(MESSAGE_LIST_LENGTH, &canvas->dest_width, PIPE_PATH);

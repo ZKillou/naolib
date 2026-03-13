@@ -1,0 +1,35 @@
+#pragma once
+
+#include "glyph.h"
+
+// Définition d'un type pour une police
+typedef const Glyph (*font_t)[256];
+
+/**
+ * Définit la police d'écriture courante.
+ * @param font Pointeur vers le tableau de 256 Glyphs de la police.
+ */
+void font_set(font_t font);
+
+/**
+ * Récupère la police d'écriture courante.
+ * @return Pointeur vers le tableau de 256 Glyphs de la police.
+ */
+font_t font_get_current(void);
+
+/**
+ * Récupère un glyphe de la police courante.
+ * @param c Caractère ASCII/Code.
+ * @return Le glyphe correspondant.
+ */
+Glyph font_get_glyph(unsigned char c);
+
+/**
+ * Récupère la position du premier bit allumé de la police courante.
+ */
+int font_get_min_y(void);
+
+/**
+ * Récupère la position du dernier bit allumé de la police courante.
+ */
+int font_get_max_y(void);

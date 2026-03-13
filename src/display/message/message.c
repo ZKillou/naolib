@@ -1,7 +1,9 @@
 #include "message.h"
 #include <stdlib.h>
 #include <string.h>
+#include "../glyphs/font_manager.h"
 #include "../glyphs/glyphs_lp_b.h"
+#include "../glyphs/glyphs_lp_6.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -26,7 +28,7 @@ uint32_t message_get_next_char(const char **text) {
 }
 
 uint32_t message_get_fallback_code(uint32_t code) {
-  if (bus_font[code].cols != NULL) return code;
+  if (font_get_glyph(code).cols != NULL) return code;
   switch (code) {
     case 0xE0: case 0xE1: case 0xE2: case 0xE3: case 0xE4: return 'a';
     case 0xE8: case 0xE9: case 0xEA: case 0xEB:           return 'e';
@@ -53,7 +55,7 @@ void message_update_dest_width(message_manager* msgs) {
     uint32_t code = message_get_fallback_code(message_get_next_char(&ptr));
     if (code < 256) {
       if (*(msgs->dest_width) > 0) *(msgs->dest_width) += 1;
-      *(msgs->dest_width) += bus_font[code].width;
+      *(msgs->dest_width) += font_get_glyph(code).width;
     }
   }
 }
@@ -145,6 +147,14 @@ int message_parse_pipe_command(message_manager* msgs, char* cmd) {
     }
   } else if (strcmp(token, "CLR") == 0) {
     return message_clear(msgs);
+  } else if (strcmp(token, "FNT") == 0) {
+    char *token = strtok(NULL, "|");
+    if (!token) return 0;
+    int f = atoi(token);
+    if (f == 0) font_set(&font_lp_b);
+    else if (f == 1) font_set(&font_lp_6);
+    message_update_dest_width(msgs);
+    return 1;
   }
 
   return 0;

@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-fonts = ["lp_b"]
+fonts = ["lp_b", "lp_6"]
 
 def png_to_girouette_ascii(folder_name):
   with open(f"./src/display/glyphs/glyphs_{folder_name}.h", "w") as h, open(f"./src/display/glyphs/glyphs_{folder_name}.c", "w") as c:
@@ -29,7 +29,7 @@ def png_to_girouette_ascii(folder_name):
         width, height = img.size
         
         # Génération du tableau de colonnes
-        var_name = f"bmp_ascii_{ascii_code}"
+        var_name = f"bmp_ascii_{ascii_code}_{folder_name}"
         found_ascii[ascii_code] = (var_name, width)
         
         c.write(f"const uint32_t {var_name}[] = {{\n  ")
@@ -38,13 +38,13 @@ def png_to_girouette_ascii(folder_name):
           for y in range(height):
             _, _, _, a = img.getpixel((x, y))
             if a > 128:
-              col_value |= (1 << (y + 4)) # Centrage vertical
+              col_value |= (1 << y)
           c.write(f"0x{col_value:06x}, ")
         c.write("\n};\n\n")
 
     # Création du grand tableau de 256 entrées
-    h.write("extern const Glyph bus_font[256];\n")
-    c.write("const Glyph bus_font[256] = {\n")
+    h.write(f"extern const Glyph font_{folder_name}[256];\n")
+    c.write(f"const Glyph font_{folder_name}[256] = {{\n")
     for code in range(256):
       if code in found_ascii:
         var_name, width = found_ascii[code]

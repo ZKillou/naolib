@@ -26,3 +26,9 @@
 ## CLR
 
 `CLR|`
+
+## FNT
+
+`FNT|id`
+
+- id: int (0: lp_b (grand), 1: lp_6 (petit))
