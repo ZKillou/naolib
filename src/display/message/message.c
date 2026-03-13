@@ -11,7 +11,7 @@
 message_manager* message_create_manager(uint8_t total_size, int* dest_width, char* pipe_path) {
   message_manager* msgs = malloc(sizeof(message_manager));
   message_t* m = malloc(sizeof(message_t) * total_size);
-  *msgs = (message_manager){ m, total_size, 0, 0, dest_width, pipe_path };
+  *msgs = (message_manager){ m, total_size, 0, 0, dest_width, pipe_path, &font_lp_b };
   return msgs;
 }
 
@@ -51,7 +51,21 @@ uint32_t message_get_fallback_code(uint32_t code) {
 void message_update_dest_width(message_manager* msgs) {
   *(msgs->dest_width) = 0;
   const char* ptr = msgs->messages[msgs->current].message;
+  font_set(msgs->default_font); // On commence toujours avec la font par défaut
+
   while (*ptr != '\0') {
+    if (*ptr == '\\') {
+      if (*(ptr+1) == 'f') {
+        char f = *(ptr+2);
+        if (f == '0') font_set(&font_lp_b);
+        else if (f == '1') font_set(&font_lp_6);
+        ptr += 3;
+        continue;
+      } else if (*(ptr+1) == '\\') {
+        ptr++;
+      }
+    }
+
     uint32_t code = message_get_fallback_code(message_get_next_char(&ptr));
     if (code < 256) {
       if (*(msgs->dest_width) > 0) *(msgs->dest_width) += 1;
@@ -151,8 +165,8 @@ int message_parse_pipe_command(message_manager* msgs, char* cmd) {
     char *token = strtok(NULL, "|");
     if (!token) return 0;
     int f = atoi(token);
-    if (f == 0) font_set(&font_lp_b);
-    else if (f == 1) font_set(&font_lp_6);
+    if (f == 0) msgs->default_font = &font_lp_b;
+    else if (f == 1) msgs->default_font = &font_lp_6;
     message_update_dest_width(msgs);
     return 1;
   }

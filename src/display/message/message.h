@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "../glyphs/font_manager.h"
 
 typedef struct message_t {
   char* numero;
@@ -18,6 +19,7 @@ typedef struct message_manager {
   uint8_t current;
   int* dest_width;
   char* pipe_path;
+  font_t default_font;
 } message_manager;
 
 // Méthodes de manipulation des messages

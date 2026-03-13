@@ -1,6 +1,8 @@
 #pragma once
 
 #include "glyph.h"
+#include "glyphs_lp_b.h"
+#include "glyphs_lp_6.h"
 
 // Définition d'un type pour une police
 typedef const Glyph (*font_t)[256];

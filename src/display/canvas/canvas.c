@@ -40,11 +40,23 @@ void canvas_draw_glyph(canvas_t* canvas, int x_pos, unsigned char c, int min_x, 
 }
 
 // Fonction pour dessiner une chaîne de caractères entière
-int canvas_draw_string(canvas_t* canvas, int x_start, const char *text, int min_x, int max_x) {
+int canvas_draw_string(canvas_t* canvas, message_manager* msgs, int x_start, const char *text, int min_x, int max_x) {
   const char *ptr = text;
   int current_x = x_start;
 
   while (*ptr != '\0') {
+    if (*ptr == '\\') {
+      if (*(ptr+1) == 'f') {
+        char f = *(ptr+2);
+        if (f == '0') font_set(msgs->default_font);
+        else if (f == '1') font_set(&font_lp_6);
+        ptr += 3;
+        continue;
+      } else if (*(ptr+1) == '\\') {
+        ptr++; // On saute le premier \, on dessinera le deuxième
+      }
+    }
+
     uint32_t code = message_get_fallback_code(message_get_next_char(&ptr)); // Récupère le code Unicode
     
     if (code < 256) { // On reste dans les limites de notre tableau
@@ -69,7 +81,8 @@ void canvas_loop(canvas_t *canvas, message_manager *msgs, void (*render)(canvas_
   }
 
   // 2. On dessine le numéro fixe
-  int debut_texte = 2 + canvas_draw_string(canvas, 2, message_get_numero(msgs), 2, canvas->width);
+  font_set(msgs->default_font);
+  int debut_texte = 2 + canvas_draw_string(canvas, msgs, 2, message_get_numero(msgs), 2, canvas->width);
 
   // 3. On dessine une ligne de séparation verticale (x=18)
   // for (int y = 4; y < 20; y++) canvas[2 + debut_texte] |= (1 << y);
@@ -82,7 +95,8 @@ void canvas_loop(canvas_t *canvas, message_manager *msgs, void (*render)(canvas_
     // --- CAS TEXTE COURT : FIXE ET CENTRÉ ---
     // On calcule l'espace vide pour centrer le texte dans les 140px restants
     int padding = (available_width - canvas->dest_width) / 2;
-    canvas_draw_string(canvas, debut_texte + padding, message_get_dest(msgs), debut_texte, canvas->width);
+    font_set(msgs->default_font);
+    canvas_draw_string(canvas, msgs, debut_texte + padding, message_get_dest(msgs), debut_texte, canvas->width);
     
     // 5. On remet l'offset à 0 car rien ne doit bouger
     canvas->offset = 0;
@@ -95,11 +109,13 @@ void canvas_loop(canvas_t *canvas, message_manager *msgs, void (*render)(canvas_
   } else {
     // --- CAS TEXTE LONG : DÉFILEMENT ---
     // L'offset crée le mouvement
-    canvas_draw_string(canvas, debut_texte - canvas->offset, message_get_dest(msgs), debut_texte, canvas->width);
+    font_set(msgs->default_font);
+    canvas_draw_string(canvas, msgs, debut_texte - canvas->offset, message_get_dest(msgs), debut_texte, canvas->width);
     
     // Dessiner une deuxième fois le texte après pour un défilement infini fluide
     if ((msgs->size == 1 || canvas->tour + 1 < message_get_time(msgs)) && message_get_rebound(msgs) && debut_texte - canvas->offset + canvas->dest_width < (int)canvas->width) {
-      canvas_draw_string(canvas, debut_texte - canvas->offset + canvas->dest_width + 20, message_get_dest(msgs), debut_texte, canvas->width);
+      font_set(msgs->default_font);
+      canvas_draw_string(canvas, msgs, debut_texte - canvas->offset + canvas->dest_width + 20, message_get_dest(msgs), debut_texte, canvas->width);
     }
 
     // 5. Gestion du défilement
