@@ -292,6 +292,34 @@ const uint32_t bmp_ascii_122[] = {
   0x0e0e00, 0x0f0e00, 0x0f8e00, 0x0fce00, 0x0fee00, 0x0efe00, 0x0e7e00, 0x0e3e00, 0x0e1e00, 0x0e0e00, 
 };
 
+const uint32_t bmp_ascii_224[] = {
+  0x038800, 0x07cc00, 0x0fe600, 0x0c6620, 0x0c6660, 0x0ce6c0, 0x07ce80, 0x0ffe00, 0x0ffc00, 0x0ff800, 
+};
+
+const uint32_t bmp_ascii_231[] = {
+  0x007f00, 0x00ff80, 0x01ffc0, 0x0980c0, 0x0780c0, 0x0380c0, 0x0180c0, 0x01c1c0, 0x00c180, 0x004100, 
+};
+
+const uint32_t bmp_ascii_232[] = {
+  0x03f800, 0x07fc00, 0x0ffe00, 0x0ece20, 0x0cc660, 0x0cc6c0, 0x0cce80, 0x0cfe00, 0x04fc00, 0x007800, 
+};
+
+const uint32_t bmp_ascii_233[] = {
+  0x03f800, 0x07fc00, 0x0ffe00, 0x0ece80, 0x0cc6c0, 0x0cc660, 0x0cce20, 0x0cfe00, 0x04fc00, 0x007800, 
+};
+
+const uint32_t bmp_ascii_234[] = {
+  0x03f800, 0x07fc80, 0x0ffec0, 0x0ece60, 0x0cc620, 0x0cc620, 0x0cce60, 0x0cfec0, 0x04fc80, 0x007800, 
+};
+
+const uint32_t bmp_ascii_235[] = {
+  0x03f800, 0x07fc00, 0x0ffec0, 0x0ecec0, 0x0cc600, 0x0cc600, 0x0ccec0, 0x0cfec0, 0x04fc00, 0x007800, 
+};
+
+const uint32_t bmp_ascii_249[] = {
+  0x03fe00, 0x07fe00, 0x0ffe00, 0x0e0020, 0x0c0060, 0x0c00c0, 0x0e0080, 0x07fe00, 0x0ffe00, 0x0ffe00, 
+};
+
 const Glyph bus_font[256] = {
   [0] = {0},
   [1] = {0},
@@ -517,18 +545,18 @@ const Glyph bus_font[256] = {
   [221] = {0},
   [222] = {0},
   [223] = {0},
-  [224] = {0},
+  [224] = { bmp_ascii_224, 10 },
   [225] = {0},
   [226] = {0},
   [227] = {0},
   [228] = {0},
   [229] = {0},
   [230] = {0},
-  [231] = {0},
-  [232] = {0},
-  [233] = {0},
-  [234] = {0},
-  [235] = {0},
+  [231] = { bmp_ascii_231, 10 },
+  [232] = { bmp_ascii_232, 10 },
+  [233] = { bmp_ascii_233, 10 },
+  [234] = { bmp_ascii_234, 10 },
+  [235] = { bmp_ascii_235, 10 },
   [236] = {0},
   [237] = {0},
   [238] = {0},
@@ -542,7 +570,7 @@ const Glyph bus_font[256] = {
   [246] = {0},
   [247] = {0},
   [248] = {0},
-  [249] = {0},
+  [249] = { bmp_ascii_249, 10 },
   [250] = {0},
   [251] = {0},
   [252] = {0},
