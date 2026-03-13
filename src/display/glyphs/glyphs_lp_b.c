@@ -1,15 +1,7 @@
 #include "glyphs_lp_b.h"
 
-const uint32_t bmp_ascii_32[] = {
-  0x000000, 0x000000, 0x000000, 
-};
-
 const uint32_t bmp_ascii_33[] = {
   0x0e7ff0, 0x0e7ff0, 0x0e7ff0, 
-};
-
-const uint32_t bmp_ascii_34[] = {
-  0x000080, 0x000070, 0x000030, 0x000080, 0x000070, 0x000030, 
 };
 
 const uint32_t bmp_ascii_39[] = {
@@ -38,6 +30,14 @@ const uint32_t bmp_ascii_50[] = {
 
 const uint32_t bmp_ascii_51[] = {
   0x0e0070, 0x0e0070, 0x0e3870, 0x0e3c70, 0x0e3e70, 0x0e3f70, 0x0e3ff0, 0x0ffbf0, 0x07f1f0, 0x03e0f0, 
+};
+
+const uint32_t bmp_ascii_32[] = {
+  0x000000, 0x000000, 0x000000, 
+};
+
+const uint32_t bmp_ascii_34[] = {
+  0x000080, 0x000070, 0x000030, 0x000080, 0x000070, 0x000030, 
 };
 
 const uint32_t bmp_ascii_52[] = {
