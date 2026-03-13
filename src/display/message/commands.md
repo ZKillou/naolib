@@ -4,22 +4,24 @@
 
 ## ADD
 
-`ADD|num?|dest|rebound|time`
+`ADD|num?|dest|rebound|time|reset`
 
 - num?: str
 - dest: str
 - rebound: bool
 - time: int
+- reset: bool
 
 ## SET
 
-`SET|idx|num?|dest|rebound|time`
+`SET|idx|num?|dest|rebound|time|reset`
 
 - idx: int
 - num?: str
 - dest: str
 - rebound: bool
 - time: int
+- reset: bool
 
 ## CLR
 

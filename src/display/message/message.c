@@ -93,10 +93,13 @@ int message_parse_pipe_command(message_manager* msgs, char* cmd) {
     char *msg = strtok(NULL, "|");
     int reb = atoi(strtok(NULL, "|"));
     int t = atoi(strtok(NULL, "|"));
+    int reset = atoi(strtok(NULL, "|"));
 
     if (msg) {
-      if(strcmp(token, "ADD") == 0) return message_add(msgs, num, msg, reb, t);
-      else return message_update(msgs, idx, num, msg, reb, t);
+      int res = 0;
+      if(strcmp(token, "ADD") == 0) res = message_add(msgs, num, msg, reb, t);
+      else res = message_update(msgs, idx, num, msg, reb, t);
+      return reset ? res : 0;
     }
   } else if (strcmp(token, "CLR") == 0) {
     return message_clear(msgs);
