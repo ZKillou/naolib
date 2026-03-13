@@ -29,7 +29,7 @@ int main() {
   canvas_t* canvas = canvas_create(SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_SPEED);
   message_manager* msgs = message_create_manager(MESSAGE_LIST_LENGTH, &canvas->dest_width, PIPE_PATH);
   
-  message_add(msgs, "", "Ce bus ne prend pas de voyageurs", 1, 1);
+  message_add(msgs, "", "SANS VOYAGEURS", 1, 1);
   message_next(msgs);
 
   while (1) canvas_loop(canvas, msgs, render_show);
