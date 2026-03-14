@@ -2,7 +2,7 @@
 
 ## lp_a
 
-hauteur : 14
+hauteur : 14+1
 
 ## lp_b
 
@@ -14,7 +14,7 @@ hauteur : 19
 
 ## lp_2
 
-hauteur : 7
+hauteur : 7+1
 
 ## lp_6
 

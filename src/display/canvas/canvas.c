@@ -82,7 +82,7 @@ void canvas_loop(canvas_t *canvas, message_manager *msgs, void (*render)(canvas_
 
   // 2. On dessine le numéro fixe
   font_set(msgs->default_font);
-  int debut_texte = 2 + canvas_draw_string(canvas, msgs, 2, message_get_numero(msgs), 2, canvas->width);
+  int debut_texte = 2 + canvas_draw_string(canvas, msgs, 2, message_get_numero(msgs), 2, canvas->width) + (message_get_numero(msgs)[0] != '\0' ? 1 : 0);
 
   // 3. On dessine une ligne de séparation verticale (x=18)
   // for (int y = 4; y < 20; y++) canvas[2 + debut_texte] |= (1 << y);
