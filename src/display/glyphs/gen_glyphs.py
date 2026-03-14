@@ -1,9 +1,9 @@
 import os
 from PIL import Image
 
-fonts = ["lp_b", "lp_6"]
+fonts = [("lp_b", 16), ("lp_6", 10)]
 
-def png_to_girouette_ascii(folder_name):
+def png_to_girouette_ascii(folder_name, refheight):
   with open(f"./src/display/glyphs/glyphs_{folder_name}.h", "w") as h, open(f"./src/display/glyphs/glyphs_{folder_name}.c", "w") as c:
     folder_path = f"./src/display/glyphs/{folder_name}"
     h.write("#pragma once\n\n")
@@ -12,6 +12,8 @@ def png_to_girouette_ascii(folder_name):
     c.write(f"#include \"glyphs_{folder_name}.h\"\n\n")
     
     found_ascii = {}
+    global_min_y = 32
+    global_max_y = -1
 
     for filename in sorted(os.listdir(folder_path)):
       if filename.endswith(".png"):
@@ -30,7 +32,7 @@ def png_to_girouette_ascii(folder_name):
         
         # Génération du tableau de colonnes
         var_name = f"bmp_ascii_{ascii_code}_{folder_name}"
-        found_ascii[ascii_code] = (var_name, width)
+        found_ascii[ascii_code] = (var_name, width, height)
         
         c.write(f"const uint32_t {var_name}[] = {{\n  ")
         for x in range(width):
@@ -39,20 +41,24 @@ def png_to_girouette_ascii(folder_name):
             _, _, _, a = img.getpixel((x, y))
             if a > 128:
               col_value |= (1 << y)
+              if y < global_min_y: global_min_y = y
+              if y > global_max_y: global_max_y = y
           c.write(f"0x{col_value:06x}, ")
         c.write("\n};\n\n")
 
     # Création du grand tableau de 256 entrées
-    h.write(f"extern const Glyph font_{folder_name}[256];\n")
-    c.write(f"const Glyph font_{folder_name}[256] = {{\n")
+    c.write(f"const Glyph glyphs_{folder_name}[256] = {{\n")
     for code in range(256):
       if code in found_ascii:
-        var_name, width = found_ascii[code]
-        c.write(f"  [{code}] = {{ {var_name}, {width} }},\n")
+        var_name, width, height = found_ascii[code]
+        c.write(f"  [{code}] = {{ {var_name}, {width}, {height - refheight} }},\n")
       else:
         # Caractère vide par défaut (espace)
-        c.write(f"  [{code}] = { { 0, 0 } },\n")
-    c.write("};\n")
+        c.write(f"  [{code}] = {{ 0 }},\n")
+    c.write("};\n\n")
 
-for font in fonts:
-  png_to_girouette_ascii(font)
+    h.write(f"extern const Font font_{folder_name};\n")
+    c.write(f"const Font font_{folder_name} = {{ glyphs_{folder_name}, 0, {refheight - 1} }};\n")
+
+for (font, height) in fonts:
+  png_to_girouette_ascii(font, height)

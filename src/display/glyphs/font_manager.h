@@ -5,11 +5,11 @@
 #include "glyphs_lp_6.h"
 
 // Définition d'un type pour une police
-typedef const Glyph (*font_t)[256];
+typedef const Font* font_t;
 
 /**
  * Définit la police d'écriture courante.
- * @param font Pointeur vers le tableau de 256 Glyphs de la police.
+ * @param font Pointeur vers la structure Font de la police.
  */
 void font_set(font_t font);
 

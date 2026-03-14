@@ -2,4 +2,4 @@
 
 #include "glyph.h"
 
-extern const Glyph font_lp_b[256];
+extern const Font font_lp_b;
