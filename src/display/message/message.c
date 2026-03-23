@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../glyphs/font_manager.h"
+#include "../glyphs/glyphs_lp_a.h"
 #include "../glyphs/glyphs_lp_b.h"
 #include "../glyphs/glyphs_lp_6.h"
 #include <fcntl.h>
@@ -59,6 +60,7 @@ void message_update_dest_width(message_manager* msgs) {
         char f = *(ptr+2);
         if (f == '0') font_set(&font_lp_b);
         else if (f == '1') font_set(&font_lp_6);
+        else if (f == '2') font_set(&font_lp_a);
         ptr += 3;
         continue;
       } else if (*(ptr+1) == '\\') {
@@ -167,6 +169,7 @@ int message_parse_pipe_command(message_manager* msgs, char* cmd) {
     int f = atoi(token);
     if (f == 0) msgs->default_font = &font_lp_b;
     else if (f == 1) msgs->default_font = &font_lp_6;
+    else if (f == 2) msgs->default_font = &font_lp_a;
     message_update_dest_width(msgs);
     return 1;
   }

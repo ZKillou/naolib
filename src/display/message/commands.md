@@ -12,6 +12,8 @@
 - time: int
 - reset: bool
 
+> Lorsque du texte peut être affiché à l'écran, il est possible d'utilier `\fn` pour changer la police, avec `n` correspondant à une police dans la commande `FNT`.
+
 ## SET
 
 `SET|idx|num?|dest|rebound|time|reset`
@@ -31,4 +33,4 @@
 
 `FNT|id`
 
-- id: int (0: lp_b (grand), 1: lp_6 (petit))
+- id: int (0: lp_b (E5 ts), 1: lp_6 (petit), 2: lp_a (C20 petit))
