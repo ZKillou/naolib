@@ -18,6 +18,10 @@ void render_show(canvas_t* canvas) {
   for (int i = 0; i < canvas->width + 2; i++) printf("═");
   printf("╗\n");
 
+  printf(" ║ ");
+  for (int i = 0; i < canvas->width; i++) printf(" ");
+  printf(" ║\n");
+
   for (int y = 0; y < canvas->height; y++) {
     printf(" ║ "); // Marge à gauche
     for (int x = 0; x < canvas->width; x++) {
@@ -30,6 +34,10 @@ void render_show(canvas_t* canvas) {
     }
     printf(" ║\n");
   }
+
+  printf(" ║ ");
+  for (int i = 0; i < canvas->width; i++) printf(" ");
+  printf(" ║\n");
 
   printf(" ╚");
   for (int i = 0; i < canvas->width + 2; i++) printf("═");

@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../glyphs/font_manager.h"
-#include "../glyphs/glyphs_lp_a.h"
-#include "../glyphs/glyphs_lp_b.h"
-#include "../glyphs/glyphs_lp_6.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -12,7 +9,7 @@
 message_manager* message_create_manager(uint8_t total_size, int* dest_width, char* pipe_path) {
   message_manager* msgs = malloc(sizeof(message_manager));
   message_t* m = malloc(sizeof(message_t) * total_size);
-  *msgs = (message_manager){ m, total_size, 0, 0, dest_width, pipe_path, &font_lp_b, {0}, 0 };
+  *msgs = (message_manager){ m, total_size, 0, 0, dest_width, pipe_path, &font_lp_c, {0}, 0 };
 
   // Priorités par défaut
   font_t def_fonts[] = { &font_lp_b, &font_lp_a, &font_lp_6 };

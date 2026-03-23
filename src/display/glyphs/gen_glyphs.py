@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-fonts = [("lp_a", 14), ("lp_b", 16), ("lp_6", 10)]
+fonts = [("lp_a", 14), ("lp_b", 16), ("lp_c", 19), ("lp_6", 10)]
 
 def png_to_girouette_ascii(folder_name, refheight):
   with open(f"./src/display/glyphs/glyphs_{folder_name}.h", "w") as h, open(f"./src/display/glyphs/glyphs_{folder_name}.c", "w") as c:
