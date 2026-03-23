@@ -3,6 +3,7 @@
 #include "glyph.h"
 #include "glyphs_lp_b.h"
 #include "glyphs_lp_6.h"
+#include "glyphs_lp_a.h"
 
 // Définition d'un type pour une police
 typedef const Font* font_t;

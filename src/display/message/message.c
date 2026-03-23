@@ -12,8 +12,40 @@
 message_manager* message_create_manager(uint8_t total_size, int* dest_width, char* pipe_path) {
   message_manager* msgs = malloc(sizeof(message_manager));
   message_t* m = malloc(sizeof(message_t) * total_size);
-  *msgs = (message_manager){ m, total_size, 0, 0, dest_width, pipe_path, &font_lp_b };
+  *msgs = (message_manager){ m, total_size, 0, 0, dest_width, pipe_path, &font_lp_b, {0}, 0 };
+
+  // Priorités par défaut
+  font_t def_fonts[] = { &font_lp_b, &font_lp_a, &font_lp_6 };
+  message_set_font_priorities(msgs, def_fonts, 3);
+
   return msgs;
+}
+
+void message_set_font_priorities(message_manager* msgs, font_t* fonts, uint8_t count) {
+  if (count > MAX_FONTS_PRIORITY) count = MAX_FONTS_PRIORITY;
+  for (uint8_t i = 0; i < count; i++) {
+    msgs->font_priorities[i] = fonts[i];
+  }
+  msgs->font_priorities_count = count;
+}
+
+font_t message_get_best_font(message_manager* msgs, const char* text, int max_width, int* out_width) {
+  if (msgs->font_priorities_count == 0) {
+    if (out_width) *out_width = message_get_text_width(msgs, text, msgs->default_font);
+    return msgs->default_font;
+  }
+
+  for (uint8_t i = 0; i < msgs->font_priorities_count; i++) {
+    int w = message_get_text_width(msgs, text, msgs->font_priorities[i]);
+    if (w <= max_width) {
+      if (out_width) *out_width = w;
+      return msgs->font_priorities[i];
+    }
+  }
+
+  // Fallback : première police de la liste pour faire défiler
+  if (out_width) *out_width = message_get_text_width(msgs, text, msgs->font_priorities[0]);
+  return msgs->font_priorities[0];
 }
 
 uint32_t message_get_next_char(const char **text) {
@@ -49,16 +81,16 @@ uint32_t message_get_fallback_code(uint32_t code) {
   }
 }
 
-void message_update_dest_width(message_manager* msgs) {
-  *(msgs->dest_width) = 0;
-  const char* ptr = msgs->messages[msgs->current].message;
-  font_set(msgs->default_font); // On commence toujours avec la font par défaut
+int message_get_text_width(message_manager* msgs, const char* text, font_t font) {
+  int width = 0;
+  const char* ptr = text;
+  font_set(font);
 
   while (*ptr != '\0') {
     if (*ptr == '\\') {
       if (*(ptr+1) == 'f') {
         char f = *(ptr+2);
-        if (f == '0') font_set(&font_lp_b);
+        if (f == '0') font_set(msgs->default_font);
         else if (f == '1') font_set(&font_lp_6);
         else if (f == '2') font_set(&font_lp_a);
         ptr += 3;
@@ -70,10 +102,15 @@ void message_update_dest_width(message_manager* msgs) {
 
     uint32_t code = message_get_fallback_code(message_get_next_char(&ptr));
     if (code < 256) {
-      if (*(msgs->dest_width) > 0) *(msgs->dest_width) += 1;
-      *(msgs->dest_width) += font_get_glyph(code).width;
+      if (width > 0) width += 1;
+      width += font_get_glyph(code).width;
     }
   }
+  return width;
+}
+
+void message_update_dest_width(message_manager* msgs) {
+  *(msgs->dest_width) = message_get_text_width(msgs, msgs->messages[msgs->current].message, msgs->default_font);
 }
 
 message_t* message_next(message_manager* msgs) {

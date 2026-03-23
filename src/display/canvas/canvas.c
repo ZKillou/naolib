@@ -50,6 +50,7 @@ int canvas_draw_string(canvas_t* canvas, message_manager* msgs, int x_start, con
         char f = *(ptr+2);
         if (f == '0') font_set(msgs->default_font);
         else if (f == '1') font_set(&font_lp_6);
+        else if (f == '2') font_set(&font_lp_a);
         ptr += 3;
         continue;
       } else if (*(ptr+1) == '\\') {
@@ -90,47 +91,49 @@ void canvas_loop(canvas_t *canvas, message_manager *msgs, void (*render)(canvas_
 
   int available_width = canvas->width - debut_texte; // Espace à droite de la barre
 
-  // 4. On dessine la destination (débute après la barre à x=22)
+  // 4. On détermine la police à utiliser pour la destination
+  const char* dest_text = message_get_dest(msgs);
+  font_t font_to_use = message_get_best_font(msgs, dest_text, available_width, &canvas->dest_width);
+
+  // 5. On dessine la destination
   if (canvas->dest_width <= available_width) {
     // --- CAS TEXTE COURT : FIXE ET CENTRÉ ---
-    // On calcule l'espace vide pour centrer le texte dans les 140px restants
     int padding = (available_width - canvas->dest_width) / 2;
-    font_set(msgs->default_font);
-    canvas_draw_string(canvas, msgs, debut_texte + padding, message_get_dest(msgs), debut_texte, canvas->width);
-    
-    // 5. On remet l'offset à 0 car rien ne doit bouger
+    font_set(font_to_use);
+    canvas_draw_string(canvas, msgs, debut_texte + padding, dest_text, debut_texte, canvas->width);
+
+    // On remet l'offset à 0 car rien ne doit bouger
     canvas->offset = 0;
 
-    // 6. Gestion du temps
+    // Gestion du temps
     if(++canvas->timeElapsed >= MAX_TEXT_DISPLAY / canvas->textSpeed) {
       canvas->timeElapsed = 0;
       canvas->tour++;
     }
   } else {
     // --- CAS TEXTE LONG : DÉFILEMENT ---
-    // L'offset crée le mouvement
-    font_set(msgs->default_font);
-    canvas_draw_string(canvas, msgs, debut_texte - canvas->offset, message_get_dest(msgs), debut_texte, canvas->width);
-    
+    font_set(font_to_use);
+    canvas_draw_string(canvas, msgs, debut_texte - canvas->offset, dest_text, debut_texte, canvas->width);
+
     // Dessiner une deuxième fois le texte après pour un défilement infini fluide
     if ((msgs->size == 1 || canvas->tour + 1 < message_get_time(msgs)) && message_get_rebound(msgs) && debut_texte - canvas->offset + canvas->dest_width < (int)canvas->width) {
-      font_set(msgs->default_font);
-      canvas_draw_string(canvas, msgs, debut_texte - canvas->offset + canvas->dest_width + 20, message_get_dest(msgs), debut_texte, canvas->width);
+      font_set(font_to_use);
+      canvas_draw_string(canvas, msgs, debut_texte - canvas->offset + canvas->dest_width + 20, dest_text, debut_texte, canvas->width);
     }
 
-    // 5. Gestion du défilement
+    // Gestion du défilement
     canvas->offset++;
     if (canvas->offset >= canvas->dest_width + 20) {
       canvas->offset = message_get_rebound(msgs) ? 0 : -canvas->width;
 
-      // 6. Gestion du temps
+      // Gestion du temps
       canvas->tour++;
     }
   }
 
   // 7. Affichage
   render(canvas);
-  
+
   // 8. Passage au texte suivant
   if(msgs->size > 1 && canvas->tour >= message_get_time(msgs)) {
     canvas->tour = 0;
